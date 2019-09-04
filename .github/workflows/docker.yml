@@ -1,0 +1,27 @@
+name: Docker Image CI
+
+on: [push]
+
+#on:
+#  push:
+#    branches:
+#      - master
+
+jobs:
+
+  build:
+ 
+    runs-on: ubuntu-latest
+ 
+    steps:
+    - uses: actions/checkout@v1
+    - name: Build the Docker image
+      env:
+        DOCKER_REGISTRY_URL: d.filld.us
+        DOCKER_USERNAME: filld_build
+        DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+        REPO_NAME: github-actions-test
+      run: |
+        echo "${DOCKER_PASSWORD}" | docker login "${DOCKER_REGISTRY_URL}" -u "${DOCKER_USERNAME}" --password-stdin
+        docker build --tag ${DOCKER_REGISTRY_URL}/${REPO_NAME}:${GITHUB_REF##*/} . 
+        docker push ${DOCKER_REGISTRY_URL}/${REPO_NAME}:${GITHUB_REF##*/}
